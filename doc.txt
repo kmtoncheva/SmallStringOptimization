@@ -1,0 +1,9 @@
+In objects of type StringSSO, small string optimization is used. It is a technique that optimizes the storage of small strings (up to 15 characters). 
+This is done by using union of a fixed-size buffer on the stack (smallStr, for strings up to 16 characters with '\0'), pointer for the dynamically allocated buffer (bigStr), if it is needed 
+and the size of this buffer (bigStrLen, of type size_t).
+When the string is too big to fit in the smallStr it is dynamically allocated on the heap and the pointer to the allocated memory is stored in the first 8 bytes of the union, the others are
+for the length. To indicate that the fixed-size buffer is not used the most significant bit of the last byte of the smallStr is set to 1. It is helpful in the following functions to know whether the 
+Small string optimizaiton is used or not. Otherwise, this bit is set to 0 and in the other 7 bits of it, the length of the string is saved (in case it is small enough and no dynamic memory
+is allocated). When the string is with 15 characters (max, due to the '\0') the last byte turns to be 0. It is okay for the bit that indicates that the small string optimization is
+used but it does not show the real length (the bits for the length at the end are filled with 0). That is why we save 15 - (the real length) in the last byte.
+And when is necessary return 15 - (what is saved). And when want to return the length of the big string, the 1st bit is again set to 0, otherwise it would change the real value;
